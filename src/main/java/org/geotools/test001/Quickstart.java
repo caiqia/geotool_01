@@ -21,6 +21,7 @@ package org.geotools.test001;
 
 
 import java.io.File;
+import java.io.FileInputStream;
 
 import org.geotools.data.FileDataStore;
 
@@ -34,6 +35,22 @@ import org.geotools.styling.Style;
 import org.geotools.swing.JMapFrame;
 import org.geotools.swing.data.JFileDataStoreChooser;
 
+import org.geotools.data.FeatureSource; 
+import org.geotools.data.store.ContentFeatureCollection; 
+import org.geotools.feature.FeatureCollection; 
+import org.geotools.kml.KMLConfiguration; 
+import org.geotools.xml.Parser; 
+import org.opengis.feature.simple.SimpleFeature; 
+import org.opengis.feature.simple.SimpleFeatureType; 
+import org.xml.sax.SAXException; 
+ 
+import javax.xml.parsers.ParserConfigurationException; 
+import java.io.File; 
+import java.io.FileInputStream; 
+import java.io.IOException; 
+import java.util.Collection; 
+import java.util.List; 
+
 /**
  * Prompts the user for a shapefile and displays the contents on the screen in a map frame.
  *
@@ -46,7 +63,24 @@ public class Quickstart {
      * contents on the screen in a map frame
      */
     public static void main(String[] args) throws Exception {
-        // display a data store file chooser dialog for shapefiles
+    	FileInputStream reader = new FileInputStream("file.kml");
+        PullParser parser = new PullParser(new KMLConfiguration(), reader,
+                SimpleFeature.class);
+
+        FeatureJSON fjson = new FeatureJSON();
+        FileWriter tmp = new FileWriter("file.geojson");
+        BufferedWriter writer = new BufferedWriter(tmp);
+        ArrayList<SimpleFeature> features = new ArrayList<>();
+        SimpleFeature simpleFeature = (SimpleFeature) parser.parse();
+        while (simpleFeature != null) {
+            features.add(simpleFeature);
+            simpleFeature = (SimpleFeature) parser.parse();
+        }
+        SimpleFeatureCollection fc = DataUtilities.collection(features);
+        fjson.writeFeatureCollection(fc, writer);
+        writer.close();
+    
+        /* display a data store file chooser dialog for shapefiles
         File file = JFileDataStoreChooser.showOpenFile("shp", null);
         if (file == null) {
             return;
@@ -64,6 +98,6 @@ public class Quickstart {
         map.addLayer(layer);
 
         // Now display the map
-        JMapFrame.showMap(map);
+        JMapFrame.showMap(map);*/
     }
 }
